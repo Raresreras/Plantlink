@@ -24,5 +24,6 @@ void loop()
     }
     //Serial.println(received_data);
     Serial.write(received_data);
+    Serial.println("Poate");
   }
 }
