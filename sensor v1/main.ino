@@ -38,9 +38,9 @@ void loop() {
   Serial.print("Soil hum:");
   Serial.println(100 - get_soil());*/
   transmit(byte('V'));
-  transsmit(board_code);
+  transmit(board_code);
   transmit(byte('T'));
-  trasnmit(get_Temp());
+  transmit(get_temp());
   transmit(byte('H'));
   transmit(get_hum());
   transmit(byte('S'));
