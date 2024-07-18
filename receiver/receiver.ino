@@ -32,9 +32,9 @@ void setup() {
 }
 
 void loop() {
-  //Serial.println("WL1_" + String(100 - get_level1())); //Water level 1
-  //Serial.println("WL2_" + String(100 - get_level2())); //Water level 2
-  //Serial.println(get_data_transmitter());
+  Serial.println("WL1_" + String(100 - get_level1())); //Water level 1
+  Serial.println("WL2_" + String(100 - get_level2())); //Water level 2
+  Serial.println(get_data_transmitter());
   if (Serial.available() > 0) pump_activ = read_serial();
   switch(pump_activ){
     case 1:
