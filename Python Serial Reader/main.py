@@ -1,48 +1,116 @@
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+import sys
 import serial
 
-ser = serial.Serial()
-ser.port = 'COM8'
-ser.baudrate = 9600
-ser.timeout = None
+class SerialReaderThread(QThread):
+    data_received = pyqtSignal(str)
 
-ser.open()
-while (True):
-    bValue = ser.readline()
-    try:
-        value = int(str(bValue)[:-5][9:])
-    except:
-        continue
+    def __init__(self, port, baudrate=9600):
+        super().__init__()
+        self.port = port
+        self.baudrate = baudrate
+        self.running = True
 
-    
-    try:
-        if ('V' == chr(value)):
-            bValue = ser.readline()
-            value = int(str(bValue)[:-5][9:])
-            print("Board code " + str(value) + " has transmitted the following data")
-    except:
-        continue
+    def run(self):
+        try:
+            with serial.Serial(self.port, self.baudrate, timeout = 1) as ser:
+                while self.running:
+                    if ser.in_waiting > 0:
+                        data = ser.readline()
+                        self.data_received.emit(str(data)[:-5][2:])
+        except serial.SerialException as e:
+            self.data_received.emit(f"error: {e}")
 
-    try:
-        if ('T' == chr(value)):
-            bValue = ser.readline()
-            value = int(str(bValue)[:-5][9:])
-            print("Temperature is " + str(value))
-    except:
-        continue
+    def stop(self):
+        self.running = False
+        self.wait()
 
-    try:
-        if ('H' == chr(value)):
-            bValue = ser.readline()
-            value = int(str(bValue)[:-5][9:])
-            print("Humidity is " + str(value))
-    except:
-        continue
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Plantlink")
+        self.start_serial_reader()
+        self.setWindowTitle("Plantlink")
 
-    try:
-        if ('S' == chr(value)):
-            bValue = ser.readline()
-            value = int(str(bValue)[:-5][9:])
-            print("Soild humidity is " + str(value))
-    except:
-        continue
-ser.close()
+        #Main UI
+
+        mainWidget = QWidget()
+        self.setCentralWidget(mainWidget)
+        layout = QVBoxLayout()
+        mainWidget.setLayout(layout)
+
+        #TODO add image and labels that overlay it
+        #photoLabel = QLabel(self)
+        #print(QPixmap('diagram.jpg').isNull())
+        #pixmap = QPixmap('diagram.png')
+        #photoLabel.setPixmap(pixmap)
+        #layout.addWidget(photoLabel)
+
+        layout.addWidget(QLabel("Water level 1"))
+        self.waterLevel1Label = QLabel()
+        self.waterLevel1Label.setText("waiting data")
+        layout.addWidget(self.waterLevel1Label)
+
+        layout.addWidget(QLabel("Water level 2"))
+        self.waterLevel2Label = QLabel()
+        self.waterLevel2Label.setText("waiting data")
+        layout.addWidget(self.waterLevel2Label)
+
+        #Sensor UI
+
+        self.comboBox1 = QComboBox()
+        self.comboBox1.addItems(['101', '102', '103'])
+        self.comboBox1.activated.connect(self.boardChange)
+        layout.addWidget(self.comboBox1)
+
+        self.boardCode = QLabel()
+        self.boardCode.setText("Board version: 101")
+        self.sensorTemp = QLabel()
+        self.sensorTemp.setText("waiting data")
+        self.sensorHum = QLabel()
+        self.sensorHum.setText("waiting data")
+        self.sensorSoilHum = QLabel()
+        self.sensorSoilHum.setText("waiting data")
+
+        layout.addWidget(self.boardCode)
+        layout.addWidget(self.sensorTemp)
+        layout.addWidget(self.sensorHum)
+        layout.addWidget(self.sensorSoilHum)
+
+    def boardChange(self):
+        code = str(self.comboBox1.currentText())
+        self.boardCode.setText("Board version: "+code)
+        self.sensorHum.setText("waiting data")
+        self.sensorTemp.setText("waiting data")
+        self.sensorSoilHum.setText("waiting data")
+
+    def start_serial_reader(self):
+        port = 'COM10'
+        self.serial_thread = SerialReaderThread(port)
+        self.serial_thread.data_received.connect(self.update_label)
+        self.serial_thread.start()
+
+    def update_label(self, data):
+        code = int(self.comboBox1.currentText())
+
+        if data[:2] == 'L1':
+            self.waterLevel1Label.setText(data)
+        if data[:2] == 'L2':
+            self.waterLevel2Label.setText(data)
+
+        if data[:4] == code:
+            data = data[4:]
+            if data[:1] == 'T':
+                self.sensorTemp.setText("Temperature: " + data[1:])
+
+    def closeEvent(self, event):
+        self.serial_thread.stop()
+        event.accept()
+
+app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+
+app.exec()
