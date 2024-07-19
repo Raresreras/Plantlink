@@ -41,15 +41,25 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         mainWidget.setLayout(layout)
 
-        layout.addWidget(QLabel("Water level 1"))
+        hlayout1 = QHBoxLayout()
+        layout.addLayout(hlayout1)
+        hlayout1.addWidget(QLabel("Automatic watering"))
+        self.automaticWatering = QCheckBox()
+        hlayout1.addWidget(self.automaticWatering)
+
+        hlayout2 = QHBoxLayout()
+        layout.addLayout(hlayout2)
+        hlayout2.addWidget(QLabel("Water level 1"))
         self.waterLevel1Label = QLabel()
         self.waterLevel1Label.setText("waiting data")
-        layout.addWidget(self.waterLevel1Label)
+        hlayout2.addWidget(self.waterLevel1Label)
 
-        layout.addWidget(QLabel("Water level 2"))
+        hlayout3 = QHBoxLayout()
+        layout.addLayout(hlayout3)
+        hlayout3.addWidget(QLabel("Water level 2"))
         self.waterLevel2Label = QLabel()
         self.waterLevel2Label.setText("waiting data")
-        layout.addWidget(self.waterLevel2Label)
+        hlayout3.addWidget(self.waterLevel2Label)
 
         #Sensor UI
 
@@ -83,9 +93,25 @@ class MainWindow(QMainWindow):
         button3.released.connect(lambda: self.send_data(3))
 
         layout.addWidget(self.boardCode)
-        layout.addWidget(self.sensorTemp)
-        layout.addWidget(self.sensorHum)
-        layout.addWidget(self.sensorSoilHum)
+        hlayout4 = QHBoxLayout()
+        layout.addLayout(hlayout4)
+        hlayout4.addWidget(QLabel("Temperature"))
+        hlayout4.addWidget(self.sensorTemp)
+        
+
+        hlayout5 = QHBoxLayout()
+        layout.addLayout(hlayout5)
+        hlayout5.addWidget(QLabel("Humidity"))
+        hlayout5.addWidget(self.sensorHum)
+
+        hlayout6 = QHBoxLayout()
+        layout.addLayout(hlayout6)
+        hlayout6.addWidget(QLabel("Soil humidity"))
+        hlayout6.addWidget(self.sensorSoilHum)
+        targetHumidity = QLineEdit()
+        targetHumidity.setFixedSize(30, 20)
+        targetHumidity.setMaxLength(2)
+        hlayout6.addWidget(targetHumidity)
         layout.addWidget(button1)
         layout.addWidget(button2)
         layout.addWidget(button3)
@@ -110,6 +136,9 @@ class MainWindow(QMainWindow):
             self.waterLevel1Label.setText(data[4:])
         if data[:3] == 'WL2':
             self.waterLevel2Label.setText(data[4:])
+
+        if self.automaticWatering.isChecked():
+            print("Checked")
 
     def send_data(self, data):
         self.serial_thread.stop()
