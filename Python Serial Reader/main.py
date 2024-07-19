@@ -41,13 +41,6 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         mainWidget.setLayout(layout)
 
-        #TODO add image and labels that overlay it
-        #photoLabel = QLabel(self)
-        #print(QPixmap('diagram.jpg').isNull())
-        #pixmap = QPixmap('diagram.png')
-        #photoLabel.setPixmap(pixmap)
-        #layout.addWidget(photoLabel)
-
         layout.addWidget(QLabel("Water level 1"))
         self.waterLevel1Label = QLabel()
         self.waterLevel1Label.setText("waiting data")
@@ -74,10 +67,28 @@ class MainWindow(QMainWindow):
         self.sensorSoilHum = QLabel()
         self.sensorSoilHum.setText("waiting data")
 
+        button1 = QPushButton()
+        button1.setText("Prime pump1")
+        button1.setFixedSize(100, 40)
+        button1.released.connect(lambda: self.send_data(1))
+
+        button2 = QPushButton()
+        button2.setText("Prime pump2")
+        button2.setFixedSize(100, 40)
+        button2.released.connect(lambda: self.send_data(2))
+
+        button3 = QPushButton()
+        button3.setText("Prime pump3")
+        button3.setFixedSize(100, 40)
+        button3.released.connect(lambda: self.send_data(3))
+
         layout.addWidget(self.boardCode)
         layout.addWidget(self.sensorTemp)
         layout.addWidget(self.sensorHum)
         layout.addWidget(self.sensorSoilHum)
+        layout.addWidget(button1)
+        layout.addWidget(button2)
+        layout.addWidget(button3)
 
     def boardChange(self):
         code = str(self.comboBox1.currentText())
@@ -95,15 +106,19 @@ class MainWindow(QMainWindow):
     def update_label(self, data):
         code = int(self.comboBox1.currentText())
 
-        if data[:2] == 'L1':
-            self.waterLevel1Label.setText(data)
-        if data[:2] == 'L2':
-            self.waterLevel2Label.setText(data)
+        if data[:3] == 'WL1':
+            self.waterLevel1Label.setText(data[4:])
+        if data[:3] == 'WL2':
+            self.waterLevel2Label.setText(data[4:])
 
-        if data[:4] == code:
-            data = data[4:]
-            if data[:1] == 'T':
-                self.sensorTemp.setText("Temperature: " + data[1:])
+    def send_data(self, data):
+        self.serial_thread.stop()
+        try:
+                serial.Serial('COM10', 9600, timeout = 1).write(data)
+                print(data)
+        except serial.SerialException as e:
+            print(f"SerialException while sending data: {e}")
+        self.start_serial_reader()
 
     def closeEvent(self, event):
         self.serial_thread.stop()
