@@ -4,6 +4,8 @@ from PyQt6.QtGui import *
 import sys
 import serial
 
+data_type = 0
+
 class SerialReaderThread(QThread):
     data_received = pyqtSignal(str)
 
@@ -108,10 +110,10 @@ class MainWindow(QMainWindow):
         layout.addLayout(hlayout6)
         hlayout6.addWidget(QLabel("Soil humidity"))
         hlayout6.addWidget(self.sensorSoilHum)
-        targetHumidity = QLineEdit()
-        targetHumidity.setFixedSize(30, 20)
-        targetHumidity.setMaxLength(2)
-        hlayout6.addWidget(targetHumidity)
+        self.targetHumidity = QLineEdit()
+        self.targetHumidity.setFixedSize(30, 20)
+        self.targetHumidity.setMaxLength(2)
+        hlayout6.addWidget(self.targetHumidity)
         layout.addWidget(button1)
         layout.addWidget(button2)
         layout.addWidget(button3)
@@ -131,19 +133,43 @@ class MainWindow(QMainWindow):
 
     def update_label(self, data):
         code = int(self.comboBox1.currentText())
+        global data_type
 
         if data[:3] == 'WL1':
             self.waterLevel1Label.setText(data[4:])
         if data[:3] == 'WL2':
             self.waterLevel2Label.setText(data[4:])
 
-        if self.automaticWatering.isChecked():
-            print("Checked")
+        #automated watering function
+        try:
+            if ((self.automaticWatering.isChecked()) and (int(self.sensorSoilHum.text()) < int(self.targetHumidity.text())) and (data_type == 83)):
+                self.send_data(2)
+        except:
+            return
+
+        #data updates
+        if data == "72": #ascii for H
+            data_type = 72
+        if data == "83": #ascii for S
+            data_type = 83
+        if data == "84": #ascii for T
+            data_type = 84
+        if data == "86": #ascii for V
+            data_type = 86
+        if ((data_type == 72) and (data != "72")  and (data[:2] != "WL")):
+            self.sensorHum.setText(data)
+            data_type = 0
+        if ((data_type == 83) and (data != "83")  and (data[:2] != "WL")):
+            self.sensorSoilHum.setText(data)
+            data_type = 0
+        if ((data_type == 84) and (data != "84")  and (data[:2] != "WL")):
+            self.sensorTemp.setText(data)
+            data_type = 0
 
     def send_data(self, data):
         self.serial_thread.stop()
         try:
-                serial.Serial('COM10', 9600, timeout = 1).write(data)
+                serial.Serial('COM10', 9600, timeout = 1).write((str(data)+"/n").encode()) #something with serial doesn't work
                 print(data)
         except serial.SerialException as e:
             print(f"SerialException while sending data: {e}")
