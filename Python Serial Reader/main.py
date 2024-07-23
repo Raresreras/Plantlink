@@ -3,27 +3,37 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 import sys
 import serial
+import time
 
 data_type = 0
+gData = 0
 
 class SerialReaderThread(QThread):
     data_received = pyqtSignal(str)
 
-    def __init__(self, port, baudrate=9600):
+    def __init__(self, port, baudrate=57600):
         super().__init__()
         self.port = port
         self.baudrate = baudrate
         self.running = True
-
+    
     def run(self):
         try:
-            with serial.Serial(self.port, self.baudrate, timeout = 1) as ser:
+            with serial.Serial(self.port, self.baudrate, timeout = 0.1) as ser:
                 while self.running:
                     if ser.in_waiting > 0:
                         data = ser.readline()
                         self.data_received.emit(str(data)[:-5][2:])
+                        global gData
+                        if (gData != 0):
+                            time.sleep(1)
+                            #for x in range(0, 200):  #sending multiple data
+                            ser.write((str(gData)+"/n").encode())
+                            print(gData)
+                            gData = 0
         except serial.SerialException as e:
             self.data_received.emit(f"error: {e}")
+        print("test")
 
     def stop(self):
         self.running = False
@@ -35,6 +45,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Plantlink")
         self.start_serial_reader()
         self.setWindowTitle("Plantlink")
+        self.setFixedSize(240, 320)
 
         #Main UI
 
@@ -82,17 +93,17 @@ class MainWindow(QMainWindow):
         button1 = QPushButton()
         button1.setText("Prime pump1")
         button1.setFixedSize(100, 40)
-        button1.released.connect(lambda: self.send_data(1))
+        button1.released.connect(lambda: self.dataChange(1))
 
         button2 = QPushButton()
         button2.setText("Prime pump2")
         button2.setFixedSize(100, 40)
-        button2.released.connect(lambda: self.send_data(2))
+        button2.released.connect(lambda: self.dataChange(2))
 
         button3 = QPushButton()
         button3.setText("Prime pump3")
         button3.setFixedSize(100, 40)
-        button3.released.connect(lambda: self.send_data(3))
+        button3.released.connect(lambda: self.dataChange(3))
 
         layout.addWidget(self.boardCode)
         hlayout4 = QHBoxLayout()
@@ -131,6 +142,10 @@ class MainWindow(QMainWindow):
         self.serial_thread.data_received.connect(self.update_label)
         self.serial_thread.start()
 
+    def dataChange(self, newData):
+        global gData
+        gData = newData
+
     def update_label(self, data):
         code = int(self.comboBox1.currentText())
         global data_type
@@ -142,8 +157,8 @@ class MainWindow(QMainWindow):
 
         #automated watering function
         try:
-            if ((self.automaticWatering.isChecked()) and (int(self.sensorSoilHum.text()) < int(self.targetHumidity.text())) and (data_type == 83)):
-                self.send_data(2)
+            if ((self.automaticWatering.isChecked()) and (int(data) < int(self.targetHumidity.text())) and (data_type == 83)):
+                self.dataChange(3)
         except:
             return
 
@@ -165,15 +180,6 @@ class MainWindow(QMainWindow):
         if ((data_type == 84) and (data != "84")  and (data[:2] != "WL")):
             self.sensorTemp.setText(data)
             data_type = 0
-
-    def send_data(self, data):
-        self.serial_thread.stop()
-        try:
-                serial.Serial('COM10', 9600, timeout = 1).write((str(data)+"/n").encode()) #something with serial doesn't work
-                print(data)
-        except serial.SerialException as e:
-            print(f"SerialException while sending data: {e}")
-        self.start_serial_reader()
 
     def closeEvent(self, event):
         self.serial_thread.stop()
