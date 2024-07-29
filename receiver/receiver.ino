@@ -4,8 +4,8 @@
 #define pump2 7 //water source pump
 #define pump3 9 //main pump
 
-#define hum_sen_1 A1 //fertilizer level
-#define hum_sen_2 A2 //main water level
+#define hum_sen_1 A1 //main water level
+#define hum_sen_2 A2 //fertilizer level
 
 //communication
 byte message[VW_MAX_MESSAGE_LEN]; //buffer
@@ -13,10 +13,10 @@ byte messageLength = VW_MAX_MESSAGE_LEN; //message size
 int received_data = 0;
 
 //humidity sensor maximum and minimum values - calibration values
-int hum_min1 = 195;
-int hum_max1 = 500; 
-int hum_min2 = 550; 
-int hum_max2 = 1000; 
+int hum_min1 = 220;
+int hum_max1 = 410; 
+int hum_min2 = 200; 
+int hum_max2 = 480; 
 
 
 int pump_activ = 0;
