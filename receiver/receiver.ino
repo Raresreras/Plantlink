@@ -33,7 +33,7 @@ void setup() {
 
 void loop() {
   Serial.println("WL1_" + String(100 - get_level1())); //Water level 1
-  Serial.println("WL2_" + String(100 - get_level2())); //Water level 2, multipliying value due to tank size
+  Serial.println("WL2_" + String(100 - get_level2())); //Water level 2
   Serial.println(get_data_transmitter());
   while (Serial.available() > 0) {
     pump_activ = Serial.readStringUntil("/n").toInt();
