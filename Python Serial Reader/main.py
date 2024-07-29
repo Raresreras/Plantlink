@@ -27,13 +27,11 @@ class SerialReaderThread(QThread):
                         global gData
                         if (gData != 0):
                             time.sleep(1)
-                            #for x in range(0, 200):  #sending multiple data
                             ser.write((str(gData)+"/n").encode())
                             print(gData)
                             gData = 0
         except serial.SerialException as e:
             self.data_received.emit(f"error: {e}")
-        print("test")
 
     def stop(self):
         self.running = False
@@ -62,14 +60,14 @@ class MainWindow(QMainWindow):
 
         hlayout2 = QHBoxLayout()
         layout.addLayout(hlayout2)
-        hlayout2.addWidget(QLabel("Water level 1"))
+        hlayout2.addWidget(QLabel("Water level 1 (Main)          "))
         self.waterLevel1Label = QLabel()
         self.waterLevel1Label.setText("waiting data")
         hlayout2.addWidget(self.waterLevel1Label)
 
         hlayout3 = QHBoxLayout()
         layout.addLayout(hlayout3)
-        hlayout3.addWidget(QLabel("Water level 2"))
+        hlayout3.addWidget(QLabel("Water level 2 (Fertilization)"))
         self.waterLevel2Label = QLabel()
         self.waterLevel2Label.setText("waiting data")
         hlayout3.addWidget(self.waterLevel2Label)
@@ -91,18 +89,18 @@ class MainWindow(QMainWindow):
         self.sensorSoilHum.setText("waiting data")
 
         button1 = QPushButton()
-        button1.setText("Prime pump1")
-        button1.setFixedSize(100, 40)
+        button1.setText("Fertilization pump")
+        button1.setFixedSize(120, 40)
         button1.released.connect(lambda: self.dataChange(1))
 
         button2 = QPushButton()
-        button2.setText("Prime pump2")
-        button2.setFixedSize(100, 40)
+        button2.setText("Auxiliary pump")
+        button2.setFixedSize(120, 40)
         button2.released.connect(lambda: self.dataChange(2))
 
         button3 = QPushButton()
-        button3.setText("Prime pump3")
-        button3.setFixedSize(100, 40)
+        button3.setText("Main pump")
+        button3.setFixedSize(120, 40)
         button3.released.connect(lambda: self.dataChange(3))
 
         layout.addWidget(self.boardCode)
