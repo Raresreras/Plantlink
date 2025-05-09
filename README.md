@@ -2,12 +2,12 @@
 
 ## :wrench: English
 
-# Description
+### Description
 
 Planlink is a special network built to automate and increase efficiency of agriculture, indiferent of its scale. This system is composed from a receiver, which drives an irrigation system that has the capability to extract water from ground(with a better pump) and enrich it using various fertilizers, and a stand-alone sensor, which transmits its own data or relays data from other sensors.
 This project has been built for the InfoEducatie 2024 competition.
 
-# Tehnologies used
+### Tehnologies used
 
 The following components and modules have been used
   + Arduino Nano
@@ -31,7 +31,7 @@ The case has been 3d printed using PLA, but the use of ABS or PETG is higly reco
 
 ## :nut_and_bolt: Romanian
 
-# Descriere
+### Descriere
 
 Plantlink este o rețea special concepută pentru automatizarea și eficientizarea agriculturii, indiferent
 de dimensiunea acesteia. Acest sistem este format dintr-un receptor, ce conduce un sistem de irigare
@@ -40,7 +40,7 @@ cel puțin un senzor autonom, ce poate transmite propriile date sau retransmite 
 senzor.
 Acest proiect a fost construit pentru concursul InfoEducatie 2024. 
 
-# Tehnologii
+### Tehnologii
 
 Au fost folosite următoare module și componente
   + Arduino Nano
