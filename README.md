@@ -1,6 +1,6 @@
-### English
+# Plantlink
 
-### Plantlink
+## :wrench: English
 
 # Description
 
@@ -27,11 +27,9 @@ Alongisde these components, there also has been used
   + 1W solar panel 
   + 5V water pump
 
-The case has been 3d printed using PLA, but the use of ABS or PETG is higly recommended due to its superior thermical properties
+The case has been 3d printed using PLA, but the use of ABS or PETG is higly recommended due to its superior thermical properties.
 
-### Romanian
-
-### Plantlink
+## :nut_and_bolt: Romanian
 
 # Descriere
 
